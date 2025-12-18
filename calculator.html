@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="style_calc.css">
+  <meta charset="UTF-8">
+  <title>Calculator</title>
+</head>
+<body>
+
+<main>
+    <div class="form-grid">
+      <label>pH <input type="number" name="ph" step="any"></label>
+      <label>Total alkalinity <input type="number" name="total_alka" step="any"></label>
+      <label>Carbonate <input type="number" name="carbonate" step="any"></label>
+      <label>Hardness <input type="number" name="hardness" step="any"></label>
+      <label>Cyanuric Acid <input type="number" name="cyan_acid" step="any"></label>
+      <label>Copper <input type="number" name="copper" step="any"></label>
+      <label>Mercury <input type="number" name="mercury" step="any"></label>
+      <label>Total chlorine <input type="number" name="total_chlorine" step="any"></label>
+      <label>Free chlorine <input type="number" name="free_chlorine" step="any"></label>
+      <label>Bromine <input type="number" name="bromine" step="any"></label>
+      <label>Nitrate <input type="number" name="nitrate" step="any"></label>
+      <label>Nitrite <input type="number" name="nitrite" step="any"></label>
+      <label>Iron <input type="number" name="iron" step="any"></label>
+      <label>Chromium <input type="number" name="chromium" step="any"></label>
+      <label>Lead <input type="number" name="lead" step="any"></label>
+      <label>Fluoride <input type="number" name="fluoride" step="any"></label>
+    </div>
+    <button type="submit">Submit</button>
+    <div id="result"></div>
+  <div class="description">
+      <h1>Hazard Categories</h1>
+
+  <section>
+    <h2>1. Low</h2>
+    <p><strong>Description:</strong> substances that do not have a serious impact on human health under moderate fluctuations. Mainly affect taste, odor, and appearance of water.</p>
+    <p><strong>Parameters:</strong></p>
+    <ul>
+      <li>Total Alkalinity</li>
+      <li>Carbonate</li>
+      <li>Hardness</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>2. Medium</h2>
+    <p><strong>Description:</strong> substances that can cause discomfort or harm when significantly deviating from the norm. Moderate excess rarely poses a health threat but affects water treatment systems and skin condition.</p>
+    <p><strong>Parameters:</strong></p>
+    <ul>
+      <li>Cyanuric Acid</li>
+      <li>pH</li>
+      <li>Total Chlorine</li>
+      <li>Free Chlorine</li>
+      <li>Bromine</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>3. High</h2>
+    <p><strong>Description:</strong> toxic substances that are dangerous even with slight excess over the norm. Can cause acute poisoning and organ damage and may be fatal.</p>
+    <p><strong>Parameters:</strong></p>
+    <ul>
+      <li>Copper</li>
+      <li>Mercury</li>
+      <li>Nitrate</li>
+      <li>Nitrite</li>
+      <li>Iron</li>
+      <li>Chromium</li>
+      <li>Lead</li>
+      <li>Fluoride</li>
+    </ul>
+  </section>
+
+  <h1 style="padding-top: 15;">Water Quality Calculation Algorithm</h1>
+
+  <section class="calc">
+    <h3>Points by category</h3>
+    <ul>
+      <li>Low = 4 pts</li>
+      <li>Medium = 7 pts</li>
+      <li>High = 10 pts</li>
+    </ul>
+
+    <h3>Point formula for each substance</h3>
+    <p>If the value is within the normal range, the substance receives the maximum score.</p>
+    <p>If it falls into the lethal range (if defined) — 0 points.</p>
+    <p>If it deviates from the norm:</p>
+    <pre>x = | s - y | / step</pre>
+    <p>where:</p>
+    <ul>
+      <li><strong>s</strong> — lower or upper bound of the norm</li>
+      <li><strong>y</strong> — substance value in water</li>
+      <li><strong>step</strong> — step used to determine points when deviating from the norm</li>
+    </ul>
+  </section>
+
+  <section class="levels">
+    <h3>Water quality assessment</h3>
+      <ul>
+        <li class="excellent">95% &lt; T — excellent</li>
+        <li class="good">90% &lt; T — good</li>
+        <li class="normal">80% &lt; T — normal</li>
+        <li class="bad">70% &lt; T — bad</li>
+        <li class="terrible">70% &gt; T — terrible</li>
+      </ul>
+  </section>
+  </div>
+</main>
+
+<script>
+  const result = document.getElementById('result');
+  const button = document.querySelector('button');
+
+  const data_calcul = {
+    "total_alka": [0.5, 1.5, 0.5, -1, -1],
+    "carbonate": [50, 120, 10, -1, -1],
+    "hardness": [20, 50, 75, -1, -1],
+    "cyan_acid": [0, 50, 2, 64, -1],
+    "ph": [6.5, 8.4, 0.1, 11, 4],
+    "total_chlorine": [0, 1, 0.3, 4, -1],
+    "free_chlorine": [0, 0.5, 0.1, 1.5, -1],
+    "bromine": [0, 0.2, 0.5, 5, -1],
+    "copper": [0, 1, 0.05, 1.3, -1],
+    "mercury": [0, 0, 0.00001, 0.0005, -1],
+    "nitrate": [0, 10, 3, 50, -1],
+    "nitrite": [0, 1, 0.3, 3, -1],
+    "iron": [0, 0, 0.05, 0.5, -1],
+    "chromium": [0, 2, 0.1, 3, -1],
+    "lead": [0, 0, 0.01, 0.1, -1],
+    "fluoride": [0, 4, 0.1, 5, -1],
+  };
+
+  button.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    const inputs = document.querySelectorAll('input');
+    const data = {};
+    let max_total = 127;
+    let total = 127;
+    const weak = ["total_alka", "carbonate", "hardness"];
+    const med = ["ph", "cyan_acid", "total_chlorine", "free_chlorine", "bromine"];
+    const strong = ["copper", "mercury", "nitrate", "nitrite", "iron", "chromium", "lead", "fluoride"];
+
+    inputs.forEach(input => {
+      data[input.name] = parseFloat(input.value);
+    });
+    const spisok_dead = [];
+    for (const key in data) {
+      const value = data[key];
+      const data_key = data_calcul[key];
+      if (!data_key) {
+        console.warn('No reference for', key);
+        continue;
+      }
+      const [short, high, step, dead_high, dead_short] = data_key;
+      let point = 0;
+      if (weak.includes(key)) point = 4;
+      else if (med.includes(key)) point = 7;
+      else if (strong.includes(key)) point = 10;
+      else {
+        console.warn('Unknown category for', key);
+        continue;
+      }
+      if (Number.isNaN(value)){
+        total -= point;
+        max_total -= point;
+        console.warn("NaN value");
+        continue;
+      }
+      if (value >= short && value <= high) continue;
+      if ((dead_short !== -1 && value <= dead_short) || (dead_high !== -1 && value >= dead_high)) {
+        spisok_dead.push(key);
+        total -= point;
+        continue;
+      }
+      let units;
+      if (value < short) units = Math.abs(short - value) / step;
+      else units = Math.abs(value - high) / step;
+
+      const penalty = Math.min(point, units);
+      total -= penalty;
+    }
+
+    if (max_total == 0){
+      result.innerHTML = "You did not enter anything :(";
+      result.style.color = "#ffffff"
+    }
+    else if (spisok_dead.length > 0) {
+      result.innerHTML = "Lethal dose: " + spisok_dead.join(', ') + "<br>Result: 0" + " out of " + max_total;
+      result.style.color = "#ff0000"
+    } else {
+      let style_color = NaN;
+      let text = "";
+      if (total >= (Math.round(max_total * 0.95))) {
+        text = "Excellent water";
+        style_color = "excellent";
+      } else if (total >= (Math.round(max_total * 0.90))) {
+        text = "Good water";
+        style_color = "good";
+      } else if (total >= (Math.round(max_total * 0.80))) {
+        text = "Normal water";
+        style_color = "normal";
+      } else if (total >= (Math.round(max_total * 0.70))) {
+        text = "Bad water";
+        style_color = "bad";
+      } else {
+        text = "Terrible water";
+        style_color = "terrible";
+      }
+      total = Math.round(Math.max(0, Math.round(total * 100) / 100));
+      result.innerHTML = text + "<br>Result: " + total + " out of " + max_total;
+      if (style_color === "excellent") result.style.color = "#00ff00";
+      else if (style_color === "good") result.style.color = "#7fff00";
+      else if (style_color === "normal") result.style.color = "#ffff00";
+      else if (style_color === "bad") result.style.color = "#ff7f00";
+      else if (style_color === "terrible") result.style.color = "#ff0000";
+    }
+  });
+</script>
+</body>
+</html>
